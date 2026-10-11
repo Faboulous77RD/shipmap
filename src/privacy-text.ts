@@ -19,7 +19,7 @@ export const PRIVACY_ITEMS: ReadonlyArray<{ label: string; text: string }> = [
   },
   {
     label: 'Feedback',
-    text: 'Was über „Feedback“ abgeschickt wird, geht als Text an PostHog (Serverstandort EU), auch ohne Einwilligung zur Nutzungsmessung; das Absenden ist die Einwilligung für diese Übertragung. Zweck: Hinweise zur Verbesserung von Shipmap. Speicherdauer wie bei den Ereignissen.',
+    text: 'Was über „Feedback“ abgeschickt wird, geht als Text an denselben Empfänger PostHog, auch ohne Einwilligung zur Nutzungsmessung; das Absenden ist die Einwilligung für diese Übertragung. Zweck: Hinweise zur Verbesserung von Shipmap. Speicherdauer wie bei den Ereignissen.',
   },
   {
     label: 'Speicherdauer',

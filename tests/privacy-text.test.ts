@@ -17,7 +17,7 @@ const EXPECTED: ReadonlyArray<[string, string]> = [
   ],
   [
     'Feedback',
-    'Was über „Feedback“ abgeschickt wird, geht als Text an PostHog (Serverstandort EU), auch ohne Einwilligung zur Nutzungsmessung; das Absenden ist die Einwilligung für diese Übertragung. Zweck: Hinweise zur Verbesserung von Shipmap. Speicherdauer wie bei den Ereignissen.',
+    'Was über „Feedback“ abgeschickt wird, geht als Text an denselben Empfänger PostHog, auch ohne Einwilligung zur Nutzungsmessung; das Absenden ist die Einwilligung für diese Übertragung. Zweck: Hinweise zur Verbesserung von Shipmap. Speicherdauer wie bei den Ereignissen.',
   ],
   [
     'Speicherdauer',
