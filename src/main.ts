@@ -5,6 +5,7 @@ import { createTelemetry, setTelemetry } from './telemetry.ts'
 import { mountConsent } from './ui/consent.ts'
 import { createFeedbackSender } from './feedback-client.ts'
 import { mountFeedback } from './ui/feedback.ts'
+import { mountPrivacy } from './ui/privacy.ts'
 
 mount(document.querySelector<HTMLDivElement>('#app')!, window.localStorage)
 
@@ -31,3 +32,8 @@ const feedback = document.createElement('div')
 feedback.id = 'feedback'
 document.body.append(feedback)
 mountFeedback(feedback, import.meta.env.VITE_POSTHOG_KEY, createFeedbackSender(import.meta.env.VITE_POSTHOG_KEY ?? ''))
+
+const privacy = document.createElement('div')
+privacy.id = 'privacy'
+document.body.append(privacy)
+mountPrivacy(privacy)

@@ -119,3 +119,26 @@ body {
   margin: 0;
   overflow-wrap: anywhere;
 }
+
+#privacy {
+  max-width: 100%;
+  margin: 1rem 0;
+}
+
+#privacy .privacy-notice {
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 0.5rem 0;
+}
+
+#privacy dl,
+#privacy dt,
+#privacy dd {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+#privacy dd {
+  margin: 0 0 0.5rem;
+}
