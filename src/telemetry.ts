@@ -2,7 +2,11 @@ import { consentEnabled, readChoice } from './consent.ts'
 import type { Choice } from './consent.ts'
 import type { StorageLike } from './store.ts'
 
-export type EventName = 'seite_geoeffnet'
+export type EventName =
+  | 'seite_geoeffnet'
+  | 'produkt_angelegt'
+  | 'feature_angelegt'
+  | 'status_geaendert'
 
 export interface TelemetryClient {
   optIn(): void
