@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  addFeature,
   addProduct,
+  deleteFeature,
   emptyState,
   loadState,
   saveState,
@@ -107,6 +109,88 @@ describe('loadState', () => {
   it('gibt einen mit saveState geschriebenen Zustand unverändert zurück', () => {
     const storage = memoryStorage()
     const s = addProduct(addProduct(emptyState(), 'Shipmap'), 'Notizbuch')
+    saveState(storage, s)
+    expect(loadState(storage)).toEqual(s)
+  })
+})
+
+describe('addFeature', () => {
+  const base = () => addProduct(emptyState(), 'Shipmap')
+
+  it('schneidet den Titel zu und hängt Features mit Status Idee am Ende an', () => {
+    const s = addFeature(addFeature(base(), 'p1', '  Login '), 'p1', 'Export')
+    expect(s.products[0].features).toEqual([
+      { id: 'f1', title: 'Login', status: 'Idee' },
+      { id: 'f2', title: 'Export', status: 'Idee' },
+    ])
+  })
+
+  it('lässt den Zustand bei leerem Titel unverändert', () => {
+    const s = base()
+    expect(addFeature(s, 'p1', '   ')).toBe(s)
+    expect(addFeature(s, 'p1', '')).toBe(s)
+  })
+
+  it('vergibt auch nach dem Löschen eine eindeutige id', () => {
+    let s = addFeature(addFeature(base(), 'p1', 'A'), 'p1', 'B')
+    s = deleteFeature(s, 'p1', 'f1')
+    s = addFeature(s, 'p1', 'C')
+    const ids = s.products[0].features.map((f) => f.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(s.products[0].features.map((f) => f.title)).toEqual(['B', 'C'])
+  })
+
+  it('lässt den Zustand bei unbekannter productId unverändert', () => {
+    const s = base()
+    expect(addFeature(s, 'p9', 'A')).toBe(s)
+  })
+
+  it('verändert das übergebene Objekt nicht und nur das Produkt productId', () => {
+    const s = addFeature(addProduct(base(), 'Notizbuch'), 'p1', 'A')
+    const before = JSON.stringify(s)
+    const t = addFeature(s, 'p2', 'B')
+    expect(JSON.stringify(s)).toBe(before)
+    expect(t.products[0]).toBe(s.products[0])
+    expect(t.products[1].features).toHaveLength(1)
+    expect(t.selectedId).toBe(s.selectedId)
+  })
+})
+
+describe('deleteFeature', () => {
+  const withThree = () => {
+    let s = addProduct(addProduct(emptyState(), 'Shipmap'), 'Notizbuch')
+    s = addFeature(s, 'p1', 'A')
+    s = addFeature(s, 'p1', 'B')
+    s = addFeature(s, 'p1', 'C')
+    return addFeature(s, 'p2', 'X')
+  }
+
+  it('entfernt genau das Feature und behält die Reihenfolge der übrigen', () => {
+    const s = withThree()
+    const t = deleteFeature(s, 'p1', 'f2')
+    expect(t.products[0].features.map((f) => f.title)).toEqual(['A', 'C'])
+  })
+
+  it('lässt den Zustand bei unbekannter productId oder featureId unverändert', () => {
+    const s = withThree()
+    expect(deleteFeature(s, 'p9', 'f1')).toBe(s)
+    expect(deleteFeature(s, 'p1', 'f9')).toBe(s)
+  })
+
+  it('verändert das übergebene Objekt nicht und nur das Produkt productId', () => {
+    const s = withThree()
+    const before = JSON.stringify(s)
+    const t = deleteFeature(s, 'p1', 'f1')
+    expect(JSON.stringify(s)).toBe(before)
+    expect(t.products[1]).toBe(s.products[1])
+    expect(t.selectedId).toBe(s.selectedId)
+  })
+})
+
+describe('Features und Speicher', () => {
+  it('kommen nach saveState und loadState unverändert zurück', () => {
+    const storage = memoryStorage()
+    const s = addFeature(addFeature(addProduct(emptyState(), 'Shipmap'), 'p1', 'Login'), 'p1', 'Export')
     saveState(storage, s)
     expect(loadState(storage)).toEqual(s)
   })
