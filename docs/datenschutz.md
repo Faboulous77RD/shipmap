@@ -1,13 +1,12 @@
 # Datenschutzhinweis (Entwurf)
 
-Verantwortlich: [Name, Anschrift, E-Mail des Verantwortlichen]
+- Verantwortlich: [Platzhalter: Name, Anschrift und E-Mail des Verantwortlichen]
+- Lokale Daten: Produkte und Listen liegen nur im Browser dieses Geräts (localStorage). Sie werden nicht übertragen und nicht gesichert; wer die Browserdaten löscht oder den Browser wechselt, verliert sie.
+- Empfänger: Nutzungsereignisse gehen nur nach deiner Einwilligung an PostHog (Serverstandort EU, eu.i.posthog.com).
+- Zweck: Zu prüfen, ob und wie Shipmap genutzt wird. Gesendet werden nur die Ereignisse Seite geöffnet, Produkt angelegt, Feature angelegt und Status geändert, ohne Namen, Titel oder Notizen.
+- Speicherdauer: Ereignisse werden bei PostHog 12 Monate gespeichert und danach gelöscht.
+- Widerruf: Ohne Einwilligung wird nichts gesendet. Eine erteilte Einwilligung widerrufst du jederzeit unter „Einwilligung ändern“.
 
-- Shipmap speichert Produkte und Features im `localStorage` des Browsers. Diese Daten verlassen das Gerät nicht.
-- Nutzungsereignisse (etwa „Feature angelegt“) werden nur nach ausdrücklicher Einwilligung gesendet. Die Einwilligung kann jederzeit in der Anwendung widerrufen werden.
-- Nutzungsereignisse enthalten keine Namen, keine E-Mail-Adressen und keine Inhalte von Features.
-- Das Feedback-Formular überträgt den eingegebenen Text und, falls angegeben, eine Kontaktadresse. Angaben sind freiwillig.
-- Empfänger und Speicherdauer von Nutzungsereignissen und Feedback: [wird mit der Wahl des Dienstes ergänzt].
-- Die Anwendung wird als statische Seite über GitHub Pages ausgeliefert. Beim Aufruf verarbeitet GitHub technische Verbindungsdaten nach eigenen Bestimmungen.
-- Betroffenenrechte (Auskunft, Löschung, Widerruf): Anfrage an die oben genannte Adresse.
+Die Anwendung wird als statische Seite über GitHub Pages ausgeliefert. Beim Aufruf verarbeitet GitHub technische Verbindungsdaten nach eigenen Bestimmungen.
 
-Stand: 2026-10-09. Dieser Entwurf ersetzt keine rechtliche Prüfung.
+Stand: 2026-10-11. Dieser Entwurf ersetzt keine rechtliche Prüfung.
