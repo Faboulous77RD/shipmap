@@ -1,4 +1,4 @@
-import { addProduct, loadState, saveState, selectProduct } from './store.ts'
+import { addFeature, addProduct, deleteFeature, loadState, saveState, selectProduct } from './store.ts'
 import type { State, StorageLike } from './store.ts'
 
 export function appName(): string {
@@ -72,6 +72,46 @@ export function mount(root: HTMLElement, storage: StorageLike): void {
       main.append(el('h2', selected.name))
       if (selected.features.length === 0) {
         main.append(el('p', 'Noch keine Features.'))
+      }
+
+      const featureForm = el('form')
+      featureForm.className = 'field'
+      const featureLabel = el('label', 'Feature-Titel')
+      featureLabel.htmlFor = 'feature-title'
+      const featureInput = el('input')
+      featureInput.id = 'feature-title'
+      featureInput.type = 'text'
+      featureInput.autocomplete = 'off'
+      const featureButton = el('button', 'Feature hinzufügen')
+      featureButton.type = 'submit'
+      featureForm.append(featureLabel, featureInput, featureButton)
+      featureForm.addEventListener('submit', (event) => {
+        event.preventDefault()
+        update(addFeature(state, selected.id, featureInput.value))
+        if (featureInput.isConnected) featureInput.value = ''
+      })
+      main.append(featureForm)
+
+      if (selected.features.length > 0) {
+        const list = el('ol')
+        list.className = 'features'
+        selected.features.forEach((feature, index) => {
+          const item = el('li')
+          const remove = el('button', 'Löschen')
+          remove.type = 'button'
+          remove.setAttribute('aria-label', `Löschen: ${feature.title}`)
+          remove.addEventListener('click', () =>
+            update(deleteFeature(state, selected.id, feature.id)),
+          )
+          item.append(
+            el('span', `Priorität ${index + 1}`),
+            el('span', feature.title),
+            el('span', feature.status),
+            remove,
+          )
+          list.append(item)
+        })
+        main.append(list)
       }
     }
 
