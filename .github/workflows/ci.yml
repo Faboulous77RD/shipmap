@@ -21,6 +21,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm test
       - run: npm run test:e2e
+      - run: npm run test:e2e:dist
       - run: npm run build
         env:
           VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
