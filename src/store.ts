@@ -125,6 +125,26 @@ export function setFeatureStatus(
   return updateFeature(state, productId, featureId, (f) => ({ ...f, status: status as Status }))
 }
 
+export function moveFeature(
+  state: State,
+  productId: string,
+  featureId: string,
+  direction: 'up' | 'down',
+): State {
+  const product = state.products.find((p) => p.id === productId)
+  if (!product) return state
+  const index = product.features.findIndex((f) => f.id === featureId)
+  if (index === -1) return state
+  const target = direction === 'up' ? index - 1 : index + 1
+  if (target < 0 || target >= product.features.length) return state
+  const features = [...product.features]
+  ;[features[index], features[target]] = [features[target], features[index]]
+  return {
+    ...state,
+    products: state.products.map((p) => (p.id === productId ? { ...p, features } : p)),
+  }
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }

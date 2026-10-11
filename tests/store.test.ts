@@ -5,6 +5,7 @@ import {
   deleteFeature,
   emptyState,
   loadState,
+  moveFeature,
   renameFeature,
   saveState,
   selectProduct,
@@ -267,5 +268,76 @@ describe('renameFeature und setFeatureStatus', () => {
     const s = setFeatureStatus(renameFeature(base(), 'p1', 'f1', 'Anmeldung'), 'p1', 'f2', 'in Arbeit')
     saveState(storage, s)
     expect(loadState(storage)).toEqual(s)
+  })
+})
+
+describe('moveFeature', () => {
+  function sample() {
+    let s = addProduct(addProduct(emptyState(), 'Shipmap'), 'Notizbuch')
+    s = addFeature(s, 'p1', 'Login')
+    s = addFeature(s, 'p1', 'Export')
+    s = addFeature(s, 'p1', 'Suche')
+    s = addFeature(s, 'p2', 'Archiv')
+    return selectProduct(s, 'p1')
+  }
+  const titles = (s: ReturnType<typeof sample>, id: string) =>
+    s.products.find((p) => p.id === id)!.features.map((f) => f.title)
+
+  it('verschiebt nach oben und unten um genau eine Position, ohne das Argument zu verändern', () => {
+    const s = sample()
+    const before = structuredClone(s)
+    const up = moveFeature(s, 'p1', 'f3', 'up')
+    expect(titles(up, 'p1')).toEqual(['Login', 'Suche', 'Export'])
+    const down = moveFeature(up, 'p1', 'f1', 'down')
+    expect(titles(down, 'p1')).toEqual(['Suche', 'Login', 'Export'])
+    expect(s).toEqual(before)
+  })
+
+  it('behält id, title, status und note der Features', () => {
+    let s = sample()
+    s = setFeatureStatus(s, 'p1', 'f2', 'geplant')
+    s = {
+      ...s,
+      products: s.products.map((p) =>
+        p.id === 'p1'
+          ? { ...p, features: p.features.map((f) => (f.id === 'f2' ? { ...f, note: 'n' } : f)) }
+          : p,
+      ),
+    }
+    const moved = moveFeature(s, 'p1', 'f2', 'up')
+    expect(moved.products[0].features[0]).toEqual({
+      id: 'f2',
+      title: 'Export',
+      status: 'geplant',
+      note: 'n',
+    })
+  })
+
+  it('lässt oberstes mit up, unterstes mit down und einzelnes Feature unverändert', () => {
+    const s = sample()
+    expect(moveFeature(s, 'p1', 'f1', 'up')).toBe(s)
+    expect(moveFeature(s, 'p1', 'f3', 'down')).toBe(s)
+    expect(moveFeature(s, 'p2', 'f1', 'up')).toBe(s)
+    expect(moveFeature(s, 'p2', 'f1', 'down')).toBe(s)
+  })
+
+  it('lässt unbekannte productId oder featureId unverändert', () => {
+    const s = sample()
+    expect(moveFeature(s, 'pX', 'f1', 'down')).toBe(s)
+    expect(moveFeature(s, 'p1', 'fX', 'down')).toBe(s)
+  })
+
+  it('ändert nur das Produkt productId und selectedId bleibt', () => {
+    const s = sample()
+    const moved = moveFeature(s, 'p1', 'f1', 'down')
+    expect(moved.products[1]).toEqual(s.products[1])
+    expect(moved.selectedId).toBe(s.selectedId)
+  })
+
+  it('übersteht den Rundlauf mit saveState und loadState', () => {
+    const moved = moveFeature(sample(), 'p1', 'f3', 'up')
+    const storage = memoryStorage()
+    saveState(storage, moved)
+    expect(loadState(storage)).toEqual(moved)
   })
 })
