@@ -168,11 +168,56 @@ test.describe('mit Schlüssel', () => {
     }
   })
 
+  test('Statuswechsel sendet je Wechsel genau ein Ereignis ohne Inhalte', async ({ page }) => {
+    const seen = await watch(page)
+    await consent(page, seen)
+    await addProduct(page, PRODUCT)
+    await addFeature(page, TITLE)
+    await expect.poll(() => named(seen, 'feature_angelegt').length, { timeout: 10000 }).toBe(1)
+    await settle(page)
+    const before = events(seen).length
+    const select = page.getByLabel(`Status: ${TITLE}`)
+
+    await select.selectOption('geplant')
+    await expect.poll(() => named(seen, 'status_geaendert').length, { timeout: 10000 }).toBe(1)
+    await select.selectOption('geplant')
+    await settle(page)
+    expect(named(seen, 'status_geaendert')).toHaveLength(1)
+
+    await select.selectOption('in Arbeit')
+    await expect.poll(() => named(seen, 'status_geaendert').length, { timeout: 10000 }).toBe(2)
+    await settle(page)
+    expect(events(seen)).toHaveLength(before + 2)
+
+    for (const request of named(seen, 'status_geaendert')) {
+      const body = readBody(request)
+      expect(body).not.toContain(PRODUCT)
+      expect(body).not.toContain(TITLE)
+      expect(body).not.toContain('geplant')
+      expect(body).not.toContain('in Arbeit')
+    }
+  })
+
+  test('Umbenennen und Neuladen senden kein status_geaendert', async ({ page }) => {
+    const seen = await watch(page)
+    await consent(page, seen)
+    await createBoth(page)
+    await expect.poll(() => named(seen, 'feature_angelegt').length, { timeout: 10000 }).toBe(1)
+    await page.getByRole('button', { name: 'Umbenennen: Erstes Feature' }).click()
+    await page.getByLabel('Neuer Titel: Erstes Feature').fill('Anderer Titel')
+    await page.getByRole('button', { name: 'Speichern' }).click()
+    await expect(page.getByText('Anderer Titel').first()).toBeVisible()
+    await page.reload()
+    await settle(page)
+    expect(named(seen, 'status_geaendert')).toHaveLength(0)
+  })
+
   test('ohne Wahl keine Anfragen beim Anlegen', async ({ page }) => {
     const seen = await watch(page)
     await page.reload()
     await expect(page.getByText(NOTICE)).toBeVisible()
     await createBoth(page)
+    await page.getByLabel('Status: Erstes Feature').selectOption('geplant')
     await settle(page)
     expect(seen).toEqual([])
   })
@@ -186,6 +231,7 @@ test.describe('mit Schlüssel', () => {
     await expect(page.getByRole('button', { name: 'Einwilligung ändern' })).toBeVisible()
     await addProduct(page, 'Notizbuch')
     await addFeature(page, 'Zweites Feature')
+    await page.getByLabel('Status: Zweites Feature').selectOption('geplant')
     await settle(page)
     expect(seen).toEqual([])
   })
@@ -199,6 +245,7 @@ test.describe('mit Schlüssel', () => {
     await settle(page)
     const before = seen.length
     await createBoth(page)
+    await page.getByLabel('Status: Erstes Feature').selectOption('geplant')
     await settle(page)
     expect(seen.length).toBe(before)
   })

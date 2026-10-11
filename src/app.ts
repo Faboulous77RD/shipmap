@@ -208,9 +208,18 @@ export function mount(root: HTMLElement, storage: StorageLike): void {
             option.selected = status === feature.status
             statusSelect.append(option)
           }
-          statusSelect.addEventListener('change', () =>
-            update(setFeatureStatus(state, selected.id, feature.id, statusSelect.value)),
-          )
+          statusSelect.addEventListener('change', () => {
+            const current = state.products
+              .find((p) => p.id === selected.id)
+              ?.features.find((f) => f.id === feature.id)?.status
+            const next = setFeatureStatus(state, selected.id, feature.id, statusSelect.value)
+            if (statusSelect.value !== current && next !== state) {
+              update(next)
+              track('status_geaendert')
+            } else {
+              update(next)
+            }
+          })
           item.append(
             el('span', `Priorität ${index + 1}`),
             titleNode,
