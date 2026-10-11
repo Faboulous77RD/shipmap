@@ -1,4 +1,13 @@
-import { addFeature, addProduct, deleteFeature, loadState, saveState, selectProduct } from './store.ts'
+import {
+  addFeature,
+  addProduct,
+  deleteFeature,
+  loadState,
+  renameFeature,
+  saveState,
+  selectProduct,
+  setFeatureStatus,
+} from './store.ts'
 import type { State, StorageLike } from './store.ts'
 
 export function appName(): string {
@@ -7,6 +16,8 @@ export function appName(): string {
 
 export function mount(root: HTMLElement, storage: StorageLike): void {
   let state: State = loadState(storage)
+  let editing: { productId: string; featureId: string; error: boolean } | null = null
+  const STATUS_OPTIONS = ['Idee', 'geplant', 'in Arbeit', 'ausgeliefert']
 
   function update(next: State): void {
     if (next === state) return
@@ -97,16 +108,89 @@ export function mount(root: HTMLElement, storage: StorageLike): void {
         list.className = 'features'
         selected.features.forEach((feature, index) => {
           const item = el('li')
+          const controls: HTMLElement[] = []
+          const isEditing =
+            editing !== null &&
+            editing.productId === selected.id &&
+            editing.featureId === feature.id
+          let titleNode: HTMLElement
+          if (isEditing) {
+            const box = el('span')
+            box.className = 'title-edit'
+            const editInput = el('input')
+            editInput.type = 'text'
+            editInput.autocomplete = 'off'
+            editInput.value = feature.title
+            editInput.setAttribute('aria-label', `Neuer Titel: ${feature.title}`)
+            box.append(editInput)
+            if (editing?.error) box.append(el('span', 'Titel darf nicht leer sein.'))
+            titleNode = box
+            const input = editInput
+            const save = (): void => {
+              if (input.value.trim() === '') {
+                editing = { productId: selected.id, featureId: feature.id, error: true }
+                render()
+                return
+              }
+              editing = null
+              const next = renameFeature(state, selected.id, feature.id, input.value)
+              if (next === state) render()
+              else update(next)
+            }
+            const cancel = (): void => {
+              editing = null
+              render()
+            }
+            input.addEventListener('keydown', (event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                save()
+              } else if (event.key === 'Escape') {
+                event.preventDefault()
+                cancel()
+              }
+            })
+            const saveButton = el('button', 'Speichern')
+            saveButton.type = 'button'
+            saveButton.addEventListener('click', save)
+            const cancelButton = el('button', 'Abbrechen')
+            cancelButton.type = 'button'
+            cancelButton.addEventListener('click', cancel)
+            controls.push(saveButton, cancelButton)
+          } else {
+            titleNode = el('span', feature.title)
+          }
           const remove = el('button', 'Löschen')
           remove.type = 'button'
           remove.setAttribute('aria-label', `Löschen: ${feature.title}`)
           remove.addEventListener('click', () =>
             update(deleteFeature(state, selected.id, feature.id)),
           )
+          const rename = el('button', 'Umbenennen')
+          rename.type = 'button'
+          rename.setAttribute('aria-label', `Umbenennen: ${feature.title}`)
+          rename.addEventListener('click', () => {
+            editing = { productId: selected.id, featureId: feature.id, error: false }
+            render()
+          })
+          const statusSelect = el('select')
+          statusSelect.setAttribute('aria-label', `Status: ${feature.title}`)
+          for (const status of STATUS_OPTIONS) {
+            const option = el('option', status)
+            option.value = status
+            option.selected = status === feature.status
+            statusSelect.append(option)
+          }
+          statusSelect.addEventListener('change', () =>
+            update(setFeatureStatus(state, selected.id, feature.id, statusSelect.value)),
+          )
           item.append(
             el('span', `Priorität ${index + 1}`),
-            el('span', feature.title),
+            titleNode,
             el('span', feature.status),
+            ...controls,
+            rename,
+            statusSelect,
             remove,
           )
           list.append(item)
@@ -116,6 +200,7 @@ export function mount(root: HTMLElement, storage: StorageLike): void {
     }
 
     root.replaceChildren(main)
+    root.querySelector<HTMLInputElement>('.title-edit input')?.focus()
   }
 
   render()
