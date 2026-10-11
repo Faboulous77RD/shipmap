@@ -7,3 +7,17 @@ body {
   margin: 0;
   padding: 1rem;
 }
+
+.field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.field input,
+.field select {
+  min-width: 0;
+  max-width: 100%;
+}
