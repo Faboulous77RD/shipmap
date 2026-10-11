@@ -5,8 +5,10 @@ import {
   deleteFeature,
   emptyState,
   loadState,
+  renameFeature,
   saveState,
   selectProduct,
+  setFeatureStatus,
   type StorageLike,
 } from '../src/store.ts'
 
@@ -191,6 +193,78 @@ describe('Features und Speicher', () => {
   it('kommen nach saveState und loadState unverändert zurück', () => {
     const storage = memoryStorage()
     const s = addFeature(addFeature(addProduct(emptyState(), 'Shipmap'), 'p1', 'Login'), 'p1', 'Export')
+    saveState(storage, s)
+    expect(loadState(storage)).toEqual(s)
+  })
+})
+
+describe('renameFeature und setFeatureStatus', () => {
+  const base = () => {
+    let s = addProduct(addProduct(emptyState(), 'Shipmap'), 'Notizbuch')
+    s = addFeature(s, 'p1', 'Login')
+    s = addFeature(s, 'p1', 'Export')
+    s = addFeature(s, 'p1', 'Suche')
+    s = addFeature(s, 'p2', 'X')
+    return { ...s, selectedId: 'p1' }
+  }
+
+  it('renameFeature schneidet zu und setzt den Titel, Status bleibt', () => {
+    const s = base()
+    const t = renameFeature(s, 'p1', 'f1', '  Anmeldung ')
+    expect(t.products[0].features[0]).toEqual({ id: 'f1', title: 'Anmeldung', status: 'Idee' })
+  })
+
+  it('renameFeature lässt den Zustand bei leerem Titel unverändert', () => {
+    const s = base()
+    expect(renameFeature(s, 'p1', 'f1', '   ')).toBe(s)
+    expect(renameFeature(s, 'p1', 'f1', '')).toBe(s)
+  })
+
+  it('setFeatureStatus setzt jeden der vier Werte, Titel bleibt', () => {
+    const s = base()
+    for (const status of ['Idee', 'geplant', 'in Arbeit', 'ausgeliefert'] as const) {
+      const f = setFeatureStatus(s, 'p1', 'f2', status).products[0].features[1]
+      expect(f).toEqual({ id: 'f2', title: 'Export', status })
+    }
+  })
+
+  it('setFeatureStatus lässt den Zustand bei ungültigem Wert unverändert', () => {
+    const s = base()
+    for (const bad of ['', 'idee', 'fertig', 'In Arbeit']) {
+      expect(setFeatureStatus(s, 'p1', 'f1', bad)).toBe(s)
+    }
+  })
+
+  it('beide lassen den Zustand bei unbekannter productId oder featureId unverändert', () => {
+    const s = base()
+    expect(renameFeature(s, 'p9', 'f1', 'Neu')).toBe(s)
+    expect(renameFeature(s, 'p1', 'f9', 'Neu')).toBe(s)
+    expect(setFeatureStatus(s, 'p9', 'f1', 'geplant')).toBe(s)
+    expect(setFeatureStatus(s, 'p1', 'f9', 'geplant')).toBe(s)
+  })
+
+  it('ändern nur das eine Feature und verändern das übergebene Objekt nicht', () => {
+    const s = base()
+    s.products[0].features[1].note = 'Notiz'
+    const before = JSON.stringify(s)
+    const r = renameFeature(s, 'p1', 'f2', 'Ausgabe')
+    const u = setFeatureStatus(s, 'p1', 'f2', 'geplant')
+    expect(JSON.stringify(s)).toBe(before)
+    for (const t of [r, u]) {
+      expect(t.products[0].features.map((f) => f.id)).toEqual(['f1', 'f2', 'f3'])
+      expect(t.products[0].features[1].note).toBe('Notiz')
+      expect(t.products[0].features[0]).toBe(s.products[0].features[0])
+      expect(t.products[0].features[2]).toBe(s.products[0].features[2])
+      expect(t.products[1]).toBe(s.products[1])
+      expect(t.selectedId).toBe('p1')
+    }
+    expect(r.products[0].features[1].status).toBe('Idee')
+    expect(u.products[0].features[1].title).toBe('Export')
+  })
+
+  it('kommen nach saveState und loadState unverändert zurück', () => {
+    const storage = memoryStorage()
+    const s = setFeatureStatus(renameFeature(base(), 'p1', 'f1', 'Anmeldung'), 'p1', 'f2', 'in Arbeit')
     saveState(storage, s)
     expect(loadState(storage)).toEqual(s)
   })
