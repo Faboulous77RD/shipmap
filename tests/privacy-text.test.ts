@@ -16,6 +16,10 @@ const EXPECTED: ReadonlyArray<[string, string]> = [
     'Zu prüfen, ob und wie Shipmap genutzt wird. Gesendet werden nur die Ereignisse Seite geöffnet, Produkt angelegt, Feature angelegt und Status geändert, ohne Namen, Titel oder Notizen.',
   ],
   [
+    'Feedback',
+    'Was über „Feedback“ abgeschickt wird, geht als Text an PostHog (Serverstandort EU), auch ohne Einwilligung zur Nutzungsmessung; das Absenden ist die Einwilligung für diese Übertragung. Zweck: Hinweise zur Verbesserung von Shipmap. Speicherdauer wie bei den Ereignissen.',
+  ],
+  [
     'Speicherdauer',
     'Ereignisse werden bei PostHog 12 Monate gespeichert und danach gelöscht.',
   ],
@@ -30,18 +34,12 @@ describe('privacy-text', () => {
     expect(PRIVACY_TITLE).toBe('Datenschutzhinweis')
   })
 
-  it('hat sechs Einträge in fester Reihenfolge der Labels', () => {
-    expect(PRIVACY_ITEMS).toHaveLength(6)
+  it('hat sieben Einträge in fester Reihenfolge der Labels', () => {
+    expect(PRIVACY_ITEMS).toHaveLength(7)
     expect(PRIVACY_ITEMS.map((item) => item.label)).toEqual(EXPECTED.map(([label]) => label))
   })
 
   it.each(EXPECTED)('Text zu %s ist wörtlich', (label, text) => {
     expect(PRIVACY_ITEMS.find((item) => item.label === label)?.text).toBe(text)
-  })
-
-  it('enthält in keinem Text „Feedback“', () => {
-    for (const item of PRIVACY_ITEMS) {
-      expect(item.text).not.toContain('Feedback')
-    }
   })
 })
