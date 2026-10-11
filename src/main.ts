@@ -3,6 +3,8 @@ import { mount } from './app.ts'
 import { consentEnabled } from './consent.ts'
 import { createTelemetry, setTelemetry } from './telemetry.ts'
 import { mountConsent } from './ui/consent.ts'
+import { createFeedbackSender } from './feedback-client.ts'
+import { mountFeedback } from './ui/feedback.ts'
 
 mount(document.querySelector<HTMLDivElement>('#app')!, window.localStorage)
 
@@ -24,3 +26,8 @@ const consent = document.createElement('div')
 consent.id = 'consent'
 document.body.append(consent)
 mountConsent(consent, consentStorage, key)
+
+const feedback = document.createElement('div')
+feedback.id = 'feedback'
+document.body.append(feedback)
+mountFeedback(feedback, import.meta.env.VITE_POSTHOG_KEY, createFeedbackSender(import.meta.env.VITE_POSTHOG_KEY ?? ''))
