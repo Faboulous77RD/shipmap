@@ -40,3 +40,19 @@ body {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+.features .title-edit {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 10rem;
+}
+
+.features .title-edit input {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.features select {
+  min-width: 0;
+  max-width: 100%;
+}
