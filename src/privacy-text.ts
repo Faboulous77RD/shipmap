@@ -18,6 +18,10 @@ export const PRIVACY_ITEMS: ReadonlyArray<{ label: string; text: string }> = [
     text: 'Zu prüfen, ob und wie Shipmap genutzt wird. Gesendet werden nur die Ereignisse Seite geöffnet, Produkt angelegt, Feature angelegt und Status geändert, ohne Namen, Titel oder Notizen.',
   },
   {
+    label: 'Feedback',
+    text: 'Was über „Feedback“ abgeschickt wird, geht als Text an denselben Empfänger PostHog, auch ohne Einwilligung zur Nutzungsmessung; das Absenden ist die Einwilligung für diese Übertragung. Zweck: Hinweise zur Verbesserung von Shipmap. Speicherdauer wie bei den Ereignissen.',
+  },
+  {
     label: 'Speicherdauer',
     text: 'Ereignisse werden bei PostHog 12 Monate gespeichert und danach gelöscht.',
   },
