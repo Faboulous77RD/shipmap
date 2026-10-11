@@ -3,7 +3,7 @@ export const PRIVACY_TITLE = 'Datenschutzhinweis'
 export const PRIVACY_ITEMS: ReadonlyArray<{ label: string; text: string }> = [
   {
     label: 'Verantwortlicher',
-    text: 'Fabian Imsiecke',
+    text: 'Fabian Imsiecke, info@shipmap.de',
   },
   {
     label: 'Lokale Daten',
