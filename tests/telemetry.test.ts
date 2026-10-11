@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CONSENT_KEY } from '../src/consent.ts'
 import { createTelemetry, setTelemetry, track } from '../src/telemetry.ts'
-import type { TelemetryClient } from '../src/telemetry.ts'
+import type { EventName, TelemetryClient } from '../src/telemetry.ts'
 
 const KEY = 'phc_abc123'
 
@@ -146,5 +146,56 @@ describe('track', () => {
     setTelemetry(null)
     track('seite_geoeffnet')
     expect(calls).toEqual(['capture:seite_geoeffnet'])
+  })
+})
+
+const NEW_EVENTS: EventName[] = ['produkt_angelegt', 'feature_angelegt', 'status_geaendert']
+
+describe('neue Ereignisse', () => {
+  for (const name of NEW_EVENTS) {
+    it(`${name}: bei granted und Schlüssel genau ein capture mit dem Namen`, () => {
+      const { t, calls } = setup('granted')
+      calls.length = 0
+      t.track(name)
+      expect(calls).toEqual([`capture:${name}`])
+    })
+    it(`${name}: ohne Wahl kein Aufruf`, () => {
+      const { t, calls } = setup(undefined)
+      t.track(name)
+      expect(calls).toEqual([])
+    })
+    it(`${name}: bei denied kein Aufruf`, () => {
+      const { t, calls } = setup('denied')
+      t.track(name)
+      expect(calls).toEqual([])
+    })
+    it(`${name}: nach Widerruf kein Aufruf`, () => {
+      const { t, calls, storage } = setup('granted')
+      storage.setItem(CONSENT_KEY, 'denied')
+      calls.length = 0
+      t.track(name)
+      expect(calls).toEqual([])
+    })
+    it(`${name}: ohne Schlüssel kein Aufruf`, () => {
+      const { t, calls } = setup('granted', undefined)
+      t.track(name)
+      expect(calls).toEqual([])
+    })
+    it(`${name}: modulweites track ohne setTelemetry tut nichts`, () => {
+      setTelemetry(null)
+      expect(() => track(name)).not.toThrow()
+    })
+  }
+  it('capture erhält nur den Namen, ohne Eigenschaften', () => {
+    const args: unknown[][] = []
+    const client: TelemetryClient = {
+      optIn: () => {},
+      optOut: () => {},
+      capture: (...a: unknown[]) => void args.push(a),
+    }
+    const t = createTelemetry({ client, key: KEY, storage: memory('granted') })
+    args.length = 0
+    for (const name of NEW_EVENTS) t.track(name)
+    expect(args).toEqual(NEW_EVENTS.map((n) => [n]))
   })
 })
