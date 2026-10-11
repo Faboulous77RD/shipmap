@@ -10,6 +10,7 @@ import {
   setFeatureStatus,
 } from './store.ts'
 import type { State, StorageLike } from './store.ts'
+import { track } from './telemetry.ts'
 
 export function appName(): string {
   return 'Shipmap'
@@ -76,7 +77,11 @@ export function mount(root: HTMLElement, storage: StorageLike): void {
     form.append(label, input, button)
     form.addEventListener('submit', (event) => {
       event.preventDefault()
-      update(addProduct(state, input.value))
+      const next = addProduct(state, input.value)
+      if (next !== state) {
+        update(next)
+        track('produkt_angelegt')
+      }
       if (input.isConnected) input.value = ''
     })
     main.append(form)
@@ -100,7 +105,11 @@ export function mount(root: HTMLElement, storage: StorageLike): void {
       featureForm.append(featureLabel, featureInput, featureButton)
       featureForm.addEventListener('submit', (event) => {
         event.preventDefault()
-        update(addFeature(state, selected.id, featureInput.value))
+        const next = addFeature(state, selected.id, featureInput.value)
+        if (next !== state) {
+          update(next)
+          track('feature_angelegt')
+        }
         if (featureInput.isConnected) featureInput.value = ''
       })
       main.append(featureForm)
