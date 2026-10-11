@@ -22,6 +22,8 @@ jobs:
       - run: npm test
       - run: npm run test:e2e
       - run: npm run build
+        env:
+          VITE_POSTHOG_KEY: ${{ vars.VITE_POSTHOG_KEY }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
