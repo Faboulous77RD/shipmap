@@ -2,10 +2,10 @@ import { describe, expect, it } from 'vitest'
 import { PRIVACY_ITEMS, PRIVACY_TITLE } from '../src/privacy-text.ts'
 
 const EXPECTED: ReadonlyArray<[string, string]> = [
-  ['Verantwortlicher', 'Don Joe (vorläufig; Anschrift und E-Mail folgen)'],
+  ['Verantwortlicher', 'Fabian Imsiecke'],
   [
     'Lokale Daten',
-    'Produkte und Listen liegen nur im Browser dieses Geräts (localStorage). Sie werden nicht übertragen und nicht gesichert; wer die Browserdaten löscht oder den Browser wechselt, verliert sie.',
+    'Produkte und Listen liegen nur im Browser dieses Geräts (localStorage). Sie werden nicht übertragen und nicht gesichert; wer die Browserdaten löscht oder den Browser wechselt, verliert sie. Ebenfalls dort liegen die Wahl zur Einwilligung und, nach einer Einwilligung, ein Eintrag von PostHog mit dieser Wahl; Cookies setzt Shipmap nicht.',
   ],
   [
     'Empfänger',

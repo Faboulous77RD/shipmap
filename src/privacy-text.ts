@@ -3,11 +3,11 @@ export const PRIVACY_TITLE = 'Datenschutzhinweis'
 export const PRIVACY_ITEMS: ReadonlyArray<{ label: string; text: string }> = [
   {
     label: 'Verantwortlicher',
-    text: 'Don Joe (vorläufig; Anschrift und E-Mail folgen)',
+    text: 'Fabian Imsiecke',
   },
   {
     label: 'Lokale Daten',
-    text: 'Produkte und Listen liegen nur im Browser dieses Geräts (localStorage). Sie werden nicht übertragen und nicht gesichert; wer die Browserdaten löscht oder den Browser wechselt, verliert sie.',
+    text: 'Produkte und Listen liegen nur im Browser dieses Geräts (localStorage). Sie werden nicht übertragen und nicht gesichert; wer die Browserdaten löscht oder den Browser wechselt, verliert sie. Ebenfalls dort liegen die Wahl zur Einwilligung und, nach einer Einwilligung, ein Eintrag von PostHog mit dieser Wahl; Cookies setzt Shipmap nicht.',
   },
   {
     label: 'Empfänger',
