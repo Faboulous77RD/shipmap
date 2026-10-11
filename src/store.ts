@@ -86,6 +86,45 @@ export function deleteFeature(state: State, productId: string, featureId: string
   }
 }
 
+function updateFeature(
+  state: State,
+  productId: string,
+  featureId: string,
+  change: (feature: Feature) => Feature,
+): State {
+  const product = state.products.find((p) => p.id === productId)
+  if (!product || !product.features.some((f) => f.id === featureId)) return state
+  return {
+    ...state,
+    products: state.products.map((p) =>
+      p.id === productId
+        ? { ...p, features: p.features.map((f) => (f.id === featureId ? change(f) : f)) }
+        : p,
+    ),
+  }
+}
+
+export function renameFeature(
+  state: State,
+  productId: string,
+  featureId: string,
+  title: string,
+): State {
+  const trimmed = title.trim()
+  if (trimmed === '') return state
+  return updateFeature(state, productId, featureId, (f) => ({ ...f, title: trimmed }))
+}
+
+export function setFeatureStatus(
+  state: State,
+  productId: string,
+  featureId: string,
+  status: string,
+): State {
+  if (!STATUSES.includes(status)) return state
+  return updateFeature(state, productId, featureId, (f) => ({ ...f, status: status as Status }))
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
