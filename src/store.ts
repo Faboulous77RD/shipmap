@@ -48,6 +48,44 @@ export function selectProduct(state: State, id: string): State {
   return { ...state, selectedId: id }
 }
 
+function nextFeatureId(features: Feature[]): string {
+  const used = new Set(features.map((f) => f.id))
+  let n = features.length + 1
+  while (used.has(`f${n}`)) n++
+  return `f${n}`
+}
+
+export function addFeature(state: State, productId: string, title: string): State {
+  const trimmed = title.trim()
+  if (trimmed === '') return state
+  if (!state.products.some((p) => p.id === productId)) return state
+  return {
+    ...state,
+    products: state.products.map((p) =>
+      p.id === productId
+        ? {
+            ...p,
+            features: [
+              ...p.features,
+              { id: nextFeatureId(p.features), title: trimmed, status: 'Idee' },
+            ],
+          }
+        : p,
+    ),
+  }
+}
+
+export function deleteFeature(state: State, productId: string, featureId: string): State {
+  const product = state.products.find((p) => p.id === productId)
+  if (!product || !product.features.some((f) => f.id === featureId)) return state
+  return {
+    ...state,
+    products: state.products.map((p) =>
+      p.id === productId ? { ...p, features: p.features.filter((f) => f.id !== featureId) } : p,
+    ),
+  }
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
