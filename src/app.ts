@@ -3,6 +3,7 @@ import {
   addProduct,
   deleteFeature,
   loadState,
+  moveFeature,
   renameFeature,
   saveState,
   selectProduct,
@@ -17,6 +18,7 @@ export function appName(): string {
 export function mount(root: HTMLElement, storage: StorageLike): void {
   let state: State = loadState(storage)
   let editing: { productId: string; featureId: string; error: boolean } | null = null
+  let pendingFocus: { featureId: string; direction: 'up' | 'down' } | null = null
   const STATUS_OPTIONS = ['Idee', 'geplant', 'in Arbeit', 'ausgeliefert']
 
   function update(next: State): void {
@@ -173,6 +175,22 @@ export function mount(root: HTMLElement, storage: StorageLike): void {
             editing = { productId: selected.id, featureId: feature.id, error: false }
             render()
           })
+          const moveButtons = (['up', 'down'] as const).map((direction) => {
+            const label = direction === 'up' ? 'Nach oben' : 'Nach unten'
+            const button = el('button', label)
+            button.type = 'button'
+            button.dataset.move = direction
+            button.setAttribute('aria-label', `${label}: ${feature.title}`)
+            button.disabled =
+              direction === 'up' ? index === 0 : index === selected.features.length - 1
+            button.addEventListener('click', () => {
+              pendingFocus = { featureId: feature.id, direction }
+              const next = moveFeature(state, selected.id, feature.id, direction)
+              if (next === state) render()
+              else update(next)
+            })
+            return button
+          })
           const statusSelect = el('select')
           statusSelect.setAttribute('aria-label', `Status: ${feature.title}`)
           for (const status of STATUS_OPTIONS) {
@@ -189,6 +207,7 @@ export function mount(root: HTMLElement, storage: StorageLike): void {
             titleNode,
             el('span', feature.status),
             ...controls,
+            ...moveButtons,
             rename,
             statusSelect,
             remove,
@@ -201,6 +220,20 @@ export function mount(root: HTMLElement, storage: StorageLike): void {
 
     root.replaceChildren(main)
     root.querySelector<HTMLInputElement>('.title-edit input')?.focus()
+    if (pendingFocus) {
+      const items = Array.from(root.querySelectorAll<HTMLLIElement>('.features li'))
+      const index = selected?.features.findIndex((f) => f.id === pendingFocus?.featureId) ?? -1
+      const item = index === -1 ? undefined : items[index]
+      const preferred = item?.querySelector<HTMLButtonElement>(
+        `button[data-move="${pendingFocus.direction}"]`,
+      )
+      const other = item?.querySelector<HTMLButtonElement>(
+        `button[data-move="${pendingFocus.direction === 'up' ? 'down' : 'up'}"]`,
+      )
+      if (preferred && !preferred.disabled) preferred.focus()
+      else other?.focus()
+      pendingFocus = null
+    }
   }
 
   render()
